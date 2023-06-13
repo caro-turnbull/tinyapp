@@ -28,9 +28,9 @@ app.get("/urls.json", (req,res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
@@ -41,26 +41,38 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-app.get("/urls/:id", (req, res) => {
+app.get("/urls/:id", (req, res) => {          //indv entry pages
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] }
   res.render("urls_show", templateVars)
 });
 
-app.post("/urls", (req, res) =>{
-  let id = generateRandomString();
-  console.log(req.body, id);
-  Object.assign(urlDatabase, {[id]: req.body.longURL})
-  //or this ->  urlDatabase[id] = longURL 
-  res.redirect(`/urls/${id}`);
-  console.log(urlDatabase)
+app.post("/urls/:id", (req, res) => {
+  //req.body is what is sent from the form, req.body.longURL is the new value
+  console.log("req.body", req.body); 
+  // what is the existing key? req.params.id
+  console.log("req.params.id", req.params.id)
+  // edit urlDatabase object to update the existing key with the new value
+  urlDatabase[req.params.id] = req.body.longURL
+  // redirect back to index page
+  res.redirect(`/urls/${req.params.id}`)
+  
 })
 
-app.get ("/u/:id", (req,res) =>{        //view an indv entry in the database
-  const longURL = urlDatabase[req.params.id]
+app.post("/urls", (req, res) =>{             //create a new entry
+  let id = generateRandomString();
+  //console.log(req.body, id);
+  // urlDatabase[id] = req.body.longURL
+  Object.assign(urlDatabase, {[id]: req.body.longURL})  //brackets mean the value in the variable
+  res.redirect(`/urls/${id}`);
+  //console.log(urlDatabase)  <--not all database keys are the same type??
+})
+
+app.get ("/u/:id", (req,res) =>{        //redirects the shortest url to the actual page
+  const longURL = urlDatabase[req.params.id]     //brackets means the value in the param
   res.redirect(longURL)
 })
 
-app.post("/urls/:id/delete", (req, res) => {
+app.post("/urls/:id/delete", (req, res) => {  //delete an entry
   delete urlDatabase[req.params.id]
   res.redirect("/urls")
 } )

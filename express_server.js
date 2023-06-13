@@ -60,6 +60,11 @@ app.get ("/u/:id", (req,res) =>{        //view an indv entry in the database
   res.redirect(longURL)
 })
 
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id]
+  res.redirect("/urls")
+} )
+
 // app.get("/set", (req, res) => {
 //   const a = 1
 //   res.send(`a = ${a}`);

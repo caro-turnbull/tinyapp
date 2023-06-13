@@ -77,6 +77,13 @@ app.post("/urls/:id/delete", (req, res) => {  //delete an entry
   res.redirect("/urls")
 } )
 
+app.post("/login", (req, res) =>{
+  res.cookie('username', req.body.name)
+  //console.log("can i print a cookie", cookie)
+  console.log(`username ${req.body.name}`)
+  res.redirect("/urls")
+})
+
 // app.get("/set", (req, res) => {
 //   const a = 1
 //   res.send(`a = ${a}`);

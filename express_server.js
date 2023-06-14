@@ -88,7 +88,7 @@ app.post("/urls/:id/delete", (req, res) => {  //delete an entry
   res.redirect("/urls")
 } )
 
-app.post("/login", (req, res) =>{
+app.post("/login", (req, res) => {
   res.cookie('username', req.body.name)  //creates a cookie called username, with the value from the form
   console.log(`username ${req.body.name}`)
   res.redirect("/urls")
@@ -97,6 +97,14 @@ app.post("/login", (req, res) =>{
 app.post("/logout", (req, res) =>{
   res.clearCookie('username')  //clear cookie
   res.redirect("/urls")
+})
+
+app.get("/register", (req, res) => {
+  const templateVars = {  
+    username: req.body.email,
+    password: req.body.password
+  };
+  res.render("registration", templateVars);
 })
 
 // app.get("/set", (req, res) => {

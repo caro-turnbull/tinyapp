@@ -40,6 +40,16 @@ function generateRandomString(){
   return result
 }
 
+function userLookUpByID (userID) {
+  let userObj
+  for (let user in users) {
+    if (user === userID){
+      userObj = users[userID]
+    }
+  }
+  return userObj
+}
+
 
 //Routes
 
@@ -81,14 +91,14 @@ app.get("/urls/new", (req, res) => {         //create new
   res.render("urls_new", templateVars);
 });
 
-app.post("/login", (req, res) => {
-  res.cookie('username', req.body.name)  //creates a cookie called username, with the value from the form
-  console.log(`username ${req.body.name}`)
-  res.redirect("/urls")
-})
+// app.post("/login", (req, res) => {
+//   res.cookie('username', req.body.name)  //creates a cookie called username, with the value from the form
+//   console.log(`username ${req.body.name}`)
+//   res.redirect("/urls")
+// })
 
 app.post("/logout", (req, res) =>{
-  res.clearCookie('username')  //clear cookie
+  res.clearCookie('user_id')  //clear cookie
   res.redirect("/urls")
 })
 
@@ -100,7 +110,10 @@ app.get("/register", (req, res) => {
 })
 
 app.post("/register", (req, res) => {
-  let id = generateRandomString();
+  if (!req.body.email || !req.body.password){   // if email or password are blank
+    res.send ("Error 400 : Missing email/password")
+  } 
+  id = generateRandomString();
   //console.log(req.body, id);
   users[id] = {             //creates a new entry in the users object "database"
     id: id,

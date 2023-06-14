@@ -110,13 +110,21 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   // res.cookie('username', req.body.name)  //creates a cookie called username, with the value from the form
   // console.log(`username ${req.body.name}`)
-  
+  let email = req.body.email
+  let password = req.body.password
+  if (!userLookUpByEmail(email)){
+    res.status(400).send("Error! That email is not reigistered.")
+  }
+  if (userLookUpByEmail(email).password !== password){
+    res.status(400).send("Error! Incorrect password.")
+  }
+  res.cookie('user_id', userLookUpByEmail(email).id)
   res.redirect("/urls")
 })
 
 app.post("/logout", (req, res) =>{
   res.clearCookie('user_id')  //clear cookie
-  res.redirect("/urls")
+  res.redirect("/login")
 })
 
 app.get("/register", (req, res) => {

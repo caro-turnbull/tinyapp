@@ -77,8 +77,8 @@ app.get("/urls.json", (req,res) => {
 app.get("/urls", (req, res) => {               //url list page 
   const templateVars = {                       //passed variables urldatabase and username
     urls: urlDatabase,  
-    //userObj: users,
-    user_id: res.cookie.user_id
+    users,
+    user_id: req.cookies.user_id
   };
   res.render("urls_index", templateVars);
 });
@@ -94,15 +94,16 @@ app.post("/urls", (req, res) =>{             //create a new entry
 
 app.get("/urls/new", (req, res) => {         //create new
   const templateVars = {  
-    //userObj: users
-    user_id: res.cookie.user_id
+    users,
+    user_id: req.cookies.user_id
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/login", (req, res) => {
   const templateVars = {  
-    user_id: res.cookie.user_id
+    users,
+    user_id: req.cookies.user_id
   };
   res.render("login", templateVars);
 })
@@ -112,6 +113,9 @@ app.post("/login", (req, res) => {
   // console.log(`username ${req.body.name}`)
   let email = req.body.email
   let password = req.body.password
+  // if(req.cookies.user_id){              ??????why doesnt this work?
+  //   res.send (`Error! You are already logged in as: ${users[user_id].email}`)
+  // }
   if (!userLookUpByEmail(email)){
     res.status(400).send("Error! That email is not reigistered.")
   }
@@ -129,7 +133,8 @@ app.post("/logout", (req, res) =>{
 
 app.get("/register", (req, res) => {
   const templateVars = {  
-    user_id: res.cookie.user_id,
+    users,
+    user_id: req.cookies.user_id,
   };
   res.render("registration", templateVars);
 })
@@ -166,7 +171,8 @@ app.get("/urls/:id", (req, res) => {          //indv entry pages
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    user_id: res.cookie.user_id
+    user_id: req.cookies.user_id,
+    users
   }
   res.render("urls_show", templateVars)
 });

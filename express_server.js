@@ -44,10 +44,19 @@ function userLookUpByID (userID) {
   let userObj
   for (let user in users) {
     if (user === userID){
-      userObj = users[userID]
+      return users[userID]
     }
   }
-  return userObj
+  return null
+}
+
+function userLookUpByEmail (email) {
+  for ( let userID in users){
+    if (users[userID].email === email){
+      return users[userID]
+    }
+  }
+  return null
 }
 
 
@@ -91,11 +100,19 @@ app.get("/urls/new", (req, res) => {         //create new
   res.render("urls_new", templateVars);
 });
 
-// app.post("/login", (req, res) => {
-//   res.cookie('username', req.body.name)  //creates a cookie called username, with the value from the form
-//   console.log(`username ${req.body.name}`)
-//   res.redirect("/urls")
-// })
+app.get("/login", (req, res) => {
+  const templateVars = {  
+    user_id: res.cookie.user_id
+  };
+  res.render("login", templateVars);
+})
+
+app.post("/login", (req, res) => {
+  // res.cookie('username', req.body.name)  //creates a cookie called username, with the value from the form
+  // console.log(`username ${req.body.name}`)
+  
+  res.redirect("/urls")
+})
 
 app.post("/logout", (req, res) =>{
   res.clearCookie('user_id')  //clear cookie
@@ -111,23 +128,28 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password){   // if email or password are blank
-    res.send ("Error 400 : Missing email/password")
+    res.status(400).send ("Error 400 : Missing email/password")
   } 
-  id = generateRandomString();
-  //console.log(req.body, id);
-  users[id] = {             //creates a new entry in the users object "database"
-    id: id,
-    email: req.body.email,
-    password:  req.body.password
+  if(userLookUpByEmail(req.body.email)){      //if the entered email is already in the users object
+    res.status(400).send ("Error! Email already registered")
   }
+  if(!userLookUpByEmail(req.body.email)){
+    id = generateRandomString();
+    //console.log(req.body, id);
+    users[id] = {                 //creates a new entry in the users object "database"
+      id: id,
+      email: req.body.email,
+      password:  req.body.password
+    }
+    res.cookie('user_id', id)   //creates a cookie called user_id, with the value from the random function
+    //console.log(`user object: ${res.cookie.user_id}`)  //??Test that the users object is properly being appended to
+    res.redirect("/urls")
+  } 
   for (let userID in users) {   
     console.log(users[userID])
  //   if users[userID].email ===email)    //for later
-
   }
-  res.cookie('user_id', id)   //creates a cookie called user_id, with the value from the random function
-  //console.log(`user object: ${res.cookie.user_id}`)  //??Test that the users object is properly being appended to
-  res.redirect("/urls")
+  
   
 })
 

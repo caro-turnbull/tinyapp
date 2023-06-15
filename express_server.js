@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser")
+const bcrypt = require("bcryptjs");
 const app = express()
 const PORT = 8080
 
@@ -28,16 +29,19 @@ const urlDatabase = {
   }
 };
 
+const pw1 = "purple-monkey-dinosaur"
+
 const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "1a2b3C",
+    password: hashedPassword("purple-monkey-dinosaur"),
+    
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "xyz123",
+    password: hashedPassword("dishwasher-funk"),
   },
 };
 
@@ -86,6 +90,10 @@ function urlsForUser(id) {
   }
   return userUrls
 }
+
+function hashedPassword(password) {
+  return  bcrypt.hashSync(password, 10)
+  }
 
 // function doesTheUserMatchThePage(){ 
 //   if(req.cookies.user_id === urlDatabase[req.params.id].user){
@@ -147,17 +155,18 @@ app.get("/login", (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-  // res.cookie('username', req.body.name)  //creates a cookie called username, with the value from the form
   // console.log(`username ${req.body.name}`)
   let email = req.body.email
-  let password = req.body.password
+  let unhashed = req.body.password
+  let id = userLookUpByEmail(email)
+  //console.log(id.password)
   // if(req.cookies.user_id){              ??????why doesnt this work?
   //   res.send (`Error! You are already logged in as: ${users[user_id].email}`)
   // }
   if (!userLookUpByEmail(email)){
     res.status(400).send("Error! That email is not reigistered.")
   }
-  if (userLookUpByEmail(email).password !== password){
+  if(bcrypt.compareSync(unhashed, id.password) === false){
     res.status(400).send("Error! Incorrect password.")
   }
   res.cookie('user_id', userLookUpByEmail(email).id)
@@ -190,10 +199,11 @@ app.post("/register", (req, res) => {
     users[id] = {                 //creates a new entry in the users object "database"
       id: id,
       email: req.body.email,
-      password:  req.body.password
+      password: hashedPassword(req.body.password)
     }
-    res.cookie('user_id', id)   //creates a cookie called user_id, with the value from the random function
 
+    res.cookie('user_id', id)   //creates a cookie called user_id, with the value from the random function
+console.log(users);
     res.redirect("/urls")
   } 
   for (let userID in users) {   

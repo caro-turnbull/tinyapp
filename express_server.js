@@ -11,20 +11,33 @@ app.use(cookieParser())
 
 // Object "Databses"
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    shortId: "b2xVn2",
+    longURL: "http://www.lighthouselabs.ca",
+    user: "userRandomID"
+  }, 
+  "9sm5xK": {
+    shortId: "9sm5xK",
+    longURL: "http://www.google.com",
+    user: "user2RandomID"
+  },
+  "abc123": {
+    shortId: "abc123",
+    longURL: "http://www.hotmail.com",
+    user: "user2RandomID"
+  }
 };
 
 const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "1a2b3C",
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: "xyz123",
   },
 };
 
@@ -59,6 +72,22 @@ function userLookUpByEmail (email) {
   return null
 }
 
+function urlsForUser(id) {
+  //itterate through all urls
+  //if url.user = param id
+  // add that url object to an object
+  let userUrls = {}
+  for (let url in urlDatabase) {
+    if (id === urlDatabase[url].user){
+
+      userUrls[url] = urlDatabase[url]
+      console.log(userUrls[url]);
+    }
+  }
+    return userUrls
+  }
+
+
 
 //Routes
 
@@ -75,8 +104,13 @@ app.get("/urls.json", (req,res) => {
 // });
 
 app.get("/urls", (req, res) => {               //url list page 
+  if (!req.cookies.user_id) {
+    // setTimeout(res.redirect("/login"), 3000)
+    res.status(400).send("Error! You cannot view URLs unless you are logged in.")
+  }
+  const userUrls = urlsForUser(req.cookies.user_id)
   const templateVars = {                       //passed variables urldatabase and username
-    urls: urlDatabase,  
+    urls: userUrls,                             //created by urlsForUser function
     users,
     user_id: req.cookies.user_id
   };
@@ -84,6 +118,10 @@ app.get("/urls", (req, res) => {               //url list page
 });
 
 app.post("/urls", (req, res) =>{             //create a new entry
+  // if (!req.cookies.user_id) {
+  //   res.send("Error! You are not logged in.")
+  //   setTimeout(res.redirect("/login"), 3000)
+  // }
   let id = generateRandomString();
   //console.log(req.body, id);
   // urlDatabase[id] = req.body.longURL
@@ -155,7 +193,7 @@ app.post("/register", (req, res) => {
       password:  req.body.password
     }
     res.cookie('user_id', id)   //creates a cookie called user_id, with the value from the random function
-    //console.log(`user object: ${res.cookie.user_id}`)  //??Test that the users object is properly being appended to
+
     res.redirect("/urls")
   } 
   for (let userID in users) {   
@@ -168,9 +206,18 @@ app.post("/register", (req, res) => {
 
 
 app.get("/urls/:id", (req, res) => {          //indv entry pages
+  if (!req.cookies.user_id) {
+    // setTimeout(res.redirect("/login"), 3000)
+    res.status(400).send("Error! You cannot view URLs unless you are logged in.")
+  }
+  if(req.cookies.user_id !== urlDatabase[req.params.id].user){
+    res.status(400).send("Error! You do not have permission to view this url page.")
+  }
+  const userUrls = urlsForUser(req.cookies.user_id)
   const templateVars = { 
     id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
+    urls: userUrls, 
+    //longURL: urlDatabase[req.params.id],
     user_id: req.cookies.user_id,
     users
   }

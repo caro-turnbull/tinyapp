@@ -84,10 +84,14 @@ function urlsForUser(id) {
       console.log(userUrls[url]);
     }
   }
-    return userUrls
-  }
+  return userUrls
+}
 
-
+// function doesTheUserMatchThePage(){ 
+//   if(req.cookies.user_id === urlDatabase[req.params.id].user){
+//     return true
+//   }
+// }
 
 //Routes
 
@@ -118,10 +122,6 @@ app.get("/urls", (req, res) => {               //url list page
 });
 
 app.post("/urls", (req, res) =>{             //create a new entry
-  // if (!req.cookies.user_id) {
-  //   res.send("Error! You are not logged in.")
-  //   setTimeout(res.redirect("/login"), 3000)
-  // }
   let id = generateRandomString();
   //console.log(req.body, id);
   // urlDatabase[id] = req.body.longURL
@@ -224,7 +224,18 @@ app.get("/urls/:id", (req, res) => {          //indv entry pages
   res.render("urls_show", templateVars)
 });
 
+
 app.post("/urls/:id", (req, res) => {
+  if (!req.cookies.user_id) {
+    // setTimeout(res.redirect("/login"), 3000)
+    res.status(400).send("Error! You cannot view URLs unless you are logged in.")
+  }
+  if (req.cookies.user_id !==urlDatabase[res.params.id].shortId ){
+    res.status(400).send("Error! You do not have permission to view this url.")
+  }
+  if (!urlDatabase[res.params.id]){
+    res.status(400).send("Error! This url id does not exist.")
+  }
   //req.body is what is sent from the form, req.body.longURL is the new value
   console.log("req.body", req.body); 
   // what is the existing key? req.params.id
@@ -235,10 +246,22 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls/${req.params.id}`)
 })
 
+
 app.post("/urls/:id/delete", (req, res) => {  //delete an entry
+  if (!req.cookies.user_id) {
+    // setTimeout(res.redirect("/login"), 3000)
+    res.status(400).send("Error! You cannot delete URLs unless you are logged in.")
+  }
+  if (req.cookies.user_id !==urlDatabase[res.params.id].shortId ){
+    res.status(400).send("Error! You do not have permission to delete this url.")
+  }
+  if (!urlDatabase[res.params.id]){
+    res.status(400).send("Error! This url id does not exist.")
+  }
   delete urlDatabase[req.params.id]
   res.redirect("/urls")
 } )
+
 
 app.get ("/u/:id", (req,res) =>{        //redirects the shortest url to the actual page
   const longURL = urlDatabase[req.params.id]     //brackets means the value in the param

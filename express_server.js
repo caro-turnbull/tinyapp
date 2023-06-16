@@ -4,6 +4,8 @@ const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
+const getUserByEmail = require("./helper");
+const urlsForUser = require("./helper");
 
 //Is this middleware?
 app.set("view engine", "ejs");
@@ -87,27 +89,7 @@ function generateRandomString() {
 //   return null;
 // }
 
-function getUserByEmail(email, users) {  
-  for (const userID in users) {
-    if (users[userID].email === email) {
-      return users[userID];
-    }
-  }
-  return null;
-}
 
-function urlsForUser(id) {
-  //itterate through all urls
-  //if url.user = param id
-  // add that url object to an object
-  const userUrls = {};
-  for (const url in urlDatabase) {
-    if (id === urlDatabase[url].userID) {
-      userUrls[url] = urlDatabase[url].longURL;  // {asdfg: www.google.com, asdf: www.youtube.com}
-    }
-  }
-  return userUrls;
-}
 
 // function hashedPassword(password) {
 //   return bcrypt.hashSync(password, 10);

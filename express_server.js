@@ -127,6 +127,9 @@ app.get("/urls/new", (req, res) => {                 //create new page
 });
 
 app.get("/login", (req, res) => {                    //login page
+  if(req.session.user_id){
+    return res.status(400).send("Error! You are already signed in")
+  }
   const templateVars = {
     user: users[req.session.user_id]
   };
@@ -137,18 +140,13 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const unhashed = req.body.password;   
   const user = getUserByEmail(email, users);
-  // console.log("email entered", req.body.email)
-  // console.log("email:", email)
-  // console.log("password:", unhashed)
-  // console.log("user", user)
-  // console.log("password:", user.password)
+  
   if (!user) {
     return res.status(400).send("Error! That email is not reigistered.");
   }
   if (!bcrypt.compareSync(unhashed, user.password)) {
     return res.status(400).send("Error! Incorrect password.");
   }
-
   req.session.user_id = user.id;   
   res.redirect("/urls");
 });
@@ -160,6 +158,10 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {                   //register page
+  // if someone is already logged in
+  if(req.session.user_id){
+    return res.status(400).send("Error! You are already signed in")
+  }
   const templateVars = {
     user: users[req.session.user_id]
   };

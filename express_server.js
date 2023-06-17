@@ -137,11 +137,11 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const unhashed = req.body.password;   
   const user = getUserByEmail(email, users);
-  console.log("email entered", req.body.email)
-  console.log("email:", email)
-  console.log("password:", unhashed)
-  console.log("user", user)
-  console.log("password:", user.password)
+  // console.log("email entered", req.body.email)
+  // console.log("email:", email)
+  // console.log("password:", unhashed)
+  // console.log("user", user)
+  // console.log("password:", user.password)
   if (!user) {
     return res.status(400).send("Error! That email is not reigistered.");
   }
@@ -174,9 +174,9 @@ app.post("/register", (req, res) => {
   const user = getUserByEmail(req.body.email, users);
 
   //if the entered email is already in the users object
-  // if (user) {      
-  //   return res.status(400).send("Error! Email already registered");
-  // }
+  if (user) {      
+    return res.status(400).send("Error! Email already registered");
+  }
   //create random id
   const id = generateRandomString();
   //creates a new entry in the users object "database" using the random string
